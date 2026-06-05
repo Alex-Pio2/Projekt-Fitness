@@ -6,13 +6,17 @@ Private offline-first Fitness-PWA für Trainingspläne, Trainingslogs und Fortsc
 
 Die App ist als statische PWA gebaut. GitHub Pages kann sie direkt aus dem Repository-Root ausliefern.
 
-Empfohlene GitHub-Pages-Einstellung:
+Empfohlene GitHub-Pages-Einstellung im Repository `Alex-Pio2/Projekt-Fitness`:
 
 - Source: `Deploy from a branch`
 - Branch: `main`
 - Folder: `/ (root)`
 
-Danach kann die App in Safari geöffnet und über **Teilen > Zum Home-Bildschirm** installiert werden.
+Danach ist die App unter dieser Adresse erreichbar:
+
+`https://alex-pio2.github.io/Projekt-Fitness/`
+
+Die App kann in Safari geöffnet und über **Teilen > Zum Home-Bildschirm** installiert werden.
 
 ## Daten
 
