@@ -239,7 +239,7 @@ function initElements() {
     "weekGrid", "todayPanel", "todayTitle", "todayDescription", "startTodayButton",
     "sessionCount", "lastBackupMetric", "recentList", "plansList", "workoutTitle",
     "planEditorSelect", "planNameInput", "planDaySelect", "planDayTitleInput",
-    "savePlanNameButton", "savePlanDayButton", "planExerciseSelect", "addPlanExerciseButton",
+    "savePlanNameButton", "savePlanDayButton", "deletePlanButton", "planExerciseSelect", "addPlanExerciseButton",
     "planDayExerciseList", "workoutSubtitle", "workoutExercises", "completeWorkoutButton", "exerciseName",
     "exerciseCategory", "exerciseNote", "saveExerciseButton", "exerciseSearch", "exerciseList",
     "analysisExercise", "bestWeight", "bestTopSet", "analysisCount", "weightChart",
@@ -261,6 +261,7 @@ function wireEvents() {
   elements.planDaySelect.addEventListener("change", renderPlanEditor);
   elements.savePlanNameButton.addEventListener("click", savePlanName);
   elements.savePlanDayButton.addEventListener("click", savePlanDayTitle);
+  elements.deletePlanButton.addEventListener("click", deletePlan);
   elements.addPlanExerciseButton.addEventListener("click", addExerciseToPlanDay);
   elements.saveExerciseButton.addEventListener("click", addExercise);
   elements.exerciseSearch.addEventListener("input", renderLibrary);
@@ -485,6 +486,30 @@ async function savePlanDayTitle() {
   elements.planDaySelect.value = weekday;
   renderPlanEditor();
   openModal("Trainingstag gespeichert", "Der Trainingstag wurde lokal im Plan aktualisiert.");
+}
+
+async function deletePlan() {
+  const plan = selectedPlanForEditing();
+
+  if (state.plans.length <= 1) {
+    openModal("Letzter Plan", "Mindestens ein Trainingsplan muss erhalten bleiben.");
+    return;
+  }
+
+  const wasActive = plan.id === state.settings.activePlanId;
+  state.plans = state.plans.filter((item) => item.id !== plan.id);
+
+  if (wasActive) {
+    state.settings.activePlanId = state.plans[0].id;
+  }
+
+  state.plans.forEach((item) => {
+    item.active = item.id === state.settings.activePlanId;
+  });
+
+  await saveState();
+  render();
+  openModal("Plan gelöscht", "Der Trainingsplan wurde gelöscht. Alte Trainingslogs bleiben gespeichert.");
 }
 
 async function addExerciseToPlanDay() {

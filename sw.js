@@ -1,4 +1,4 @@
-const CACHE_NAME = "fitplan-pwa-v4";
+const CACHE_NAME = "fitplan-pwa-v5";
 
 const APP_SHELL = [
   "./",
