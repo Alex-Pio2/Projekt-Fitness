@@ -1,0 +1,1360 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#16201b">
+  <title>FitPlan Clickdummy</title>
+  <style>
+    :root {
+      --bg: #f4f6f1;
+      --surface: #ffffff;
+      --surface-2: #edf2f6;
+      --ink: #16201b;
+      --muted: #65706a;
+      --line: #dde3de;
+      --green: #1f7a55;
+      --green-soft: #dceee6;
+      --blue: #276a9c;
+      --blue-soft: #dcebf4;
+      --coral: #c65b43;
+      --coral-soft: #f5ded8;
+      --yellow: #f1c64e;
+      --shadow: 0 16px 36px rgba(22, 32, 27, 0.12);
+      --radius: 8px;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+      overflow-x: hidden;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      padding: 18px;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .phone {
+      width: min(100%, 430px);
+      max-width: 100vw;
+      min-height: calc(100vh - 36px);
+      background: var(--surface);
+      border: 1px solid rgba(22, 32, 27, 0.12);
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 18px 6px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .signal {
+      display: inline-flex;
+      gap: 4px;
+      align-items: end;
+      height: 12px;
+    }
+
+    .signal span {
+      display: block;
+      width: 3px;
+      border-radius: 2px;
+      background: var(--muted);
+    }
+
+    .signal span:nth-child(1) { height: 4px; }
+    .signal span:nth-child(2) { height: 7px; }
+    .signal span:nth-child(3) { height: 10px; opacity: 0.35; }
+
+    header {
+      padding: 8px 18px 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .topline {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .topline > div {
+      min-width: 0;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.08;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+      min-height: 28px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: var(--green-soft);
+      color: var(--green);
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    main {
+      overflow: auto;
+      overflow-x: hidden;
+      padding: 14px 14px 18px;
+      background:
+        linear-gradient(180deg, rgba(31, 122, 85, 0.05), transparent 170px),
+        var(--bg);
+    }
+
+    .view {
+      display: none;
+      animation: rise 160ms ease-out;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .stack {
+      display: grid;
+      gap: 12px;
+    }
+
+    .panel,
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      min-width: 0;
+    }
+
+    .panel {
+      padding: 14px;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    h2,
+    h3 {
+      margin: 0;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      font-size: 17px;
+      line-height: 1.2;
+    }
+
+    h3 {
+      font-size: 15px;
+      line-height: 1.25;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .action-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(126px, 1fr));
+      gap: 8px;
+    }
+
+    .btn {
+      min-width: 0;
+      min-height: 40px;
+      border-radius: var(--radius);
+      padding: 9px 12px;
+      background: var(--ink);
+      color: white;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      flex: 1 1 auto;
+      line-height: 1.15;
+      text-align: center;
+      white-space: normal;
+    }
+
+    .btn.secondary {
+      background: var(--surface-2);
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+
+    .btn.green {
+      background: var(--green);
+    }
+
+    .btn.coral {
+      background: var(--coral);
+    }
+
+    .icon {
+      width: 18px;
+      height: 18px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      font-size: 12px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .secondary .icon {
+      background: rgba(22, 32, 27, 0.08);
+    }
+
+    .week-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 6px;
+    }
+
+    .day-tile {
+      min-width: 0;
+      min-height: 72px;
+      padding: 8px 5px;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background: var(--surface);
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .day-tile strong {
+      display: block;
+      color: var(--ink);
+      font-size: 12px;
+      margin-bottom: 5px;
+    }
+
+    .day-tile span {
+      display: block;
+      font-size: 11px;
+      line-height: 1.2;
+      overflow-wrap: anywhere;
+    }
+
+    .day-tile.today {
+      background: var(--green);
+      color: white;
+      border-color: var(--green);
+    }
+
+    .day-tile.today strong {
+      color: white;
+    }
+
+    .exercise-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .exercise-item {
+      min-width: 0;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 11px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: var(--blue-soft);
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .tag.coral {
+      background: var(--coral-soft);
+      color: var(--coral);
+    }
+
+    .tag.green {
+      background: var(--green-soft);
+      color: var(--green);
+    }
+
+    .plan-card {
+      padding: 13px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .plan-card.active-plan {
+      border-color: rgba(31, 122, 85, 0.45);
+      box-shadow: inset 0 0 0 1px rgba(31, 122, 85, 0.16);
+    }
+
+    .plan-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .small-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .metric {
+      padding: 12px;
+      border-radius: var(--radius);
+      background: var(--surface);
+      border: 1px solid var(--line);
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 20px;
+      line-height: 1.1;
+      margin-bottom: 4px;
+    }
+
+    .workout-title {
+      display: grid;
+      gap: 8px;
+      padding: 14px;
+      min-width: 0;
+      color: white;
+      background:
+        linear-gradient(135deg, rgba(22, 32, 27, 0.94), rgba(31, 122, 85, 0.92)),
+        var(--ink);
+      border-radius: var(--radius);
+    }
+
+    .set-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .set-table th,
+    .set-table td {
+      padding: 8px 6px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+    }
+
+    .set-table th {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .set-inputs {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      min-height: 40px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 9px 10px;
+      background: var(--surface);
+      color: var(--ink);
+      outline: none;
+    }
+
+    textarea {
+      min-height: 72px;
+      resize: vertical;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(31, 122, 85, 0.12);
+    }
+
+    .search-wrap {
+      position: sticky;
+      top: -14px;
+      z-index: 2;
+      padding: 0 0 10px;
+      background: linear-gradient(180deg, var(--bg) 76%, rgba(244, 246, 241, 0));
+    }
+
+    .chart {
+      display: grid;
+      gap: 8px;
+    }
+
+    .line-chart {
+      position: relative;
+      min-height: 202px;
+      padding: 16px 6px 26px;
+      border-radius: var(--radius);
+      background:
+        linear-gradient(180deg, transparent 24%, rgba(22, 32, 27, 0.06) 25%, transparent 26%),
+        linear-gradient(180deg, transparent 49%, rgba(22, 32, 27, 0.06) 50%, transparent 51%),
+        linear-gradient(180deg, transparent 74%, rgba(22, 32, 27, 0.06) 75%, transparent 76%),
+        var(--surface);
+      border: 1px solid var(--line);
+    }
+
+    .line-chart svg {
+      width: 100%;
+      height: 122px;
+      display: block;
+      overflow: visible;
+    }
+
+    .chart-line {
+      fill: none;
+      stroke: var(--green);
+      stroke-width: 4;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .chart-line.blue {
+      stroke: var(--blue);
+    }
+
+    .chart-point {
+      fill: var(--surface);
+      stroke: var(--green);
+      stroke-width: 4;
+    }
+
+    .chart-point.blue {
+      stroke: var(--blue);
+    }
+
+    .chart-labels {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 4px;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 11px;
+      text-align: center;
+    }
+
+    .chart-caption {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 74px 1fr 56px;
+      gap: 8px;
+      align-items: center;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .bar-track {
+      height: 12px;
+      border-radius: 999px;
+      background: var(--surface-2);
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: inherit;
+      background: var(--green);
+    }
+
+    .bar-fill.blue {
+      background: var(--blue);
+    }
+
+    .progress-line {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 7px;
+      align-items: end;
+      min-height: 118px;
+      padding: 12px 4px 0;
+    }
+
+    .progress-point {
+      display: grid;
+      align-items: end;
+      justify-items: center;
+      gap: 7px;
+      height: 110px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .progress-point i {
+      display: block;
+      width: 100%;
+      max-width: 34px;
+      border-radius: 6px 6px 2px 2px;
+      background: var(--yellow);
+    }
+
+    .settings-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .settings-item {
+      width: 100%;
+      min-height: 54px;
+      padding: 12px;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--ink);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 12px;
+      text-align: left;
+    }
+
+    .nav {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 2px;
+      padding: 8px 8px calc(8px + var(--safe-bottom));
+      background: var(--surface);
+      border-top: 1px solid var(--line);
+    }
+
+    .nav button {
+      min-width: 0;
+      min-height: 50px;
+      border-radius: var(--radius);
+      background: transparent;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 800;
+      display: grid;
+      gap: 3px;
+      place-items: center;
+      padding: 5px 2px;
+    }
+
+    .nav b {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--surface-2);
+      color: inherit;
+      font-size: 12px;
+      line-height: 1;
+    }
+
+    .nav button.active {
+      background: var(--green-soft);
+      color: var(--green);
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 16px;
+      background: rgba(22, 32, 27, 0.42);
+    }
+
+    .modal.open {
+      display: flex;
+    }
+
+    .modal-card {
+      width: min(100%, 430px);
+      padding: 16px;
+      border-radius: 14px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      display: grid;
+      gap: 12px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 0;
+        background: var(--surface);
+        display: flex;
+        justify-content: flex-start;
+      }
+
+      .phone {
+        width: min(390px, 100vw);
+        max-width: 100vw;
+        min-height: 100vh;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+      }
+
+      main {
+        padding-inline: 12px;
+      }
+
+      .week-grid {
+        grid-template-columns: repeat(7, minmax(38px, 1fr));
+        gap: 5px;
+      }
+
+      .day-tile {
+        min-height: 66px;
+        padding-inline: 3px;
+      }
+
+      .day-tile span {
+        font-size: 10px;
+      }
+
+      .pill {
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .topline {
+        display: grid;
+        grid-template-columns: 1fr;
+        justify-items: start;
+      }
+
+      .workout-title .action-row {
+        grid-template-columns: 1fr;
+      }
+
+      .small-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .set-inputs {
+        grid-template-columns: 1fr 1fr 44px;
+      }
+
+      .btn {
+        padding-inline: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="phone" role="application" aria-label="FitPlan Clickdummy">
+    <div class="status">
+      <span>11:52</span>
+      <span class="signal" aria-label="Schlechte Verbindung"><span></span><span></span><span></span></span>
+    </div>
+
+    <header>
+      <div class="topline">
+        <div>
+          <h1 id="screenTitle">FitPlan</h1>
+          <p class="subtitle" id="screenSubtitle">Offline-first Trainingsplan für dein iPhone</p>
+        </div>
+        <span class="pill">Offline bereit</span>
+      </div>
+    </header>
+
+    <main>
+      <section class="view active" data-view="home">
+        <div class="stack">
+          <div class="panel">
+            <div class="section-head">
+              <div>
+                <h2>Aktiver Trainingsplan</h2>
+                <p class="subtitle">Hypertrophie Sommer</p>
+              </div>
+              <span class="tag green">Woche 24</span>
+            </div>
+            <div class="week-grid" aria-label="Wochenplan">
+              <button class="day-tile" type="button" onclick="showWorkoutPreview('Montag', 'Push')"><strong>Mo</strong><span>Push</span></button>
+              <button class="day-tile" type="button" onclick="showWorkoutPreview('Dienstag', 'Pause')"><strong>Di</strong><span>frei</span></button>
+              <button class="day-tile today" type="button" onclick="showWorkoutPreview('Mittwoch', 'Pull')"><strong>Mi</strong><span>Pull</span></button>
+              <button class="day-tile" type="button" onclick="showWorkoutPreview('Donnerstag', 'Pause')"><strong>Do</strong><span>frei</span></button>
+              <button class="day-tile" type="button" onclick="showWorkoutPreview('Freitag', 'Beine')"><strong>Fr</strong><span>Beine</span></button>
+              <button class="day-tile" type="button" onclick="showWorkoutPreview('Samstag', 'Optional')"><strong>Sa</strong><span>Core</span></button>
+              <button class="day-tile" type="button" onclick="showWorkoutPreview('Sonntag', 'Pause')"><strong>So</strong><span>frei</span></button>
+            </div>
+          </div>
+
+          <div class="workout-title" id="todayPreview">
+            <span class="tag">Heute</span>
+            <h2>Mittwoch: Pull</h2>
+            <p class="subtitle" style="color: rgba(255,255,255,0.78)">Klimmzüge, Rudern, Bizepscurls. Sätze und Gewicht werden erst im Training eingetragen.</p>
+            <div class="action-row">
+              <button class="btn green" type="button" onclick="showView('workout')"><span class="icon">+</span>Training starten</button>
+              <button class="btn secondary" type="button" onclick="openModal('planModal')"><span class="icon">P</span>Plan wechseln</button>
+            </div>
+          </div>
+
+          <div class="small-grid">
+            <div class="metric">
+              <strong>18</strong>
+              <span class="muted">Trainings im aktuellen Plan</span>
+            </div>
+            <div class="metric">
+              <strong>7.840 kg</strong>
+              <span class="muted">Volumen letzte Woche</span>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="section-head">
+              <h2>Zuletzt trainiert</h2>
+              <button class="btn secondary" type="button" onclick="showView('analysis')">Analyse</button>
+            </div>
+            <div class="exercise-list">
+              <div class="exercise-item">
+                <div>
+                  <h3>Bankdrücken</h3>
+                  <span class="muted">70 kg x 8, 70 kg x 7, 65 kg x 8</span>
+                </div>
+                <span class="tag green">+2,5 kg</span>
+              </div>
+              <div class="exercise-item">
+                <div>
+                  <h3>Rudern am Kabel</h3>
+                  <span class="muted">62,5 kg x 10, 62,5 kg x 9</span>
+                </div>
+                <span class="tag">stabil</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" data-view="plans">
+        <div class="stack">
+          <div class="panel">
+            <div class="section-head">
+              <div>
+                <h2>Trainingspläne</h2>
+                <p class="subtitle">Mehrere Wochenpläne, einer davon aktiv</p>
+              </div>
+              <button class="btn green" type="button" onclick="openModal('newPlanModal')"><span class="icon">+</span>Neu</button>
+            </div>
+          </div>
+
+          <div class="card plan-card active-plan">
+            <div class="plan-meta">
+              <div>
+                <h3>Hypertrophie Sommer</h3>
+                <span class="muted">Aktiver Trainingsplan</span>
+              </div>
+              <span class="tag green">aktiv</span>
+            </div>
+            <div class="exercise-list">
+              <div class="exercise-item"><span>Montag: Push</span><span class="tag">3 Übungen</span></div>
+              <div class="exercise-item"><span>Mittwoch: Pull</span><span class="tag">3 Übungen</span></div>
+              <div class="exercise-item"><span>Freitag: Beine</span><span class="tag">3 Übungen</span></div>
+            </div>
+            <div class="action-row">
+              <button class="btn secondary" type="button" onclick="openModal('editDayModal')">Tag bearbeiten</button>
+              <button class="btn secondary" type="button" onclick="openModal('planModal')">Wechseln</button>
+            </div>
+          </div>
+
+          <div class="card plan-card">
+            <div class="plan-meta">
+              <div>
+                <h3>Kraftblock</h3>
+                <span class="muted">3 Tage, schwere Grundübungen</span>
+              </div>
+              <span class="tag coral">inaktiv</span>
+            </div>
+            <button class="btn secondary" type="button" onclick="openModal('planModal')">Als aktiv setzen</button>
+          </div>
+
+          <div class="card plan-card">
+            <div class="plan-meta">
+              <div>
+                <h3>Erhaltung</h3>
+                <span class="muted">2 Tage pro Woche</span>
+              </div>
+              <span class="tag coral">inaktiv</span>
+            </div>
+            <button class="btn secondary" type="button" onclick="openModal('planModal')">Als aktiv setzen</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" data-view="workout">
+        <div class="stack">
+          <div class="workout-title">
+            <span class="tag">Live-Training</span>
+            <h2>Mittwoch: Pull</h2>
+            <p class="subtitle" style="color: rgba(255,255,255,0.78)">Trage nur Gewicht und Wiederholungen ein. Der Plan bleibt bewusst leicht.</p>
+          </div>
+
+          <div class="panel">
+            <div class="section-head">
+              <div>
+                <h2>Klimmzüge</h2>
+                <p class="subtitle">Körpergewicht, sauberer Bewegungsweg</p>
+              </div>
+              <span class="tag green" id="setCountA">2 Sätze</span>
+            </div>
+            <table class="set-table" aria-label="Sätze Klimmzüge">
+              <thead>
+                <tr><th>Satz</th><th>Gewicht</th><th>Wdh.</th></tr>
+              </thead>
+              <tbody id="setsA">
+                <tr><td>1</td><td>0 kg</td><td>8</td></tr>
+                <tr><td>2</td><td>0 kg</td><td>7</td></tr>
+              </tbody>
+            </table>
+            <div class="set-inputs">
+              <label><span class="sr-only">Gewicht</span><input id="weightA" inputmode="decimal" value="0" aria-label="Gewicht in kg"></label>
+              <label><span class="sr-only">Wiederholungen</span><input id="repsA" inputmode="numeric" value="6" aria-label="Wiederholungen"></label>
+              <button class="btn green" type="button" onclick="addSet('A')"><span class="icon">+</span></button>
+            </div>
+            <label class="muted" for="noteA">Notiz</label>
+            <textarea id="noteA">Griff etwas enger testen.</textarea>
+          </div>
+
+          <div class="panel">
+            <div class="section-head">
+              <div>
+                <h2>Rudern am Kabel</h2>
+                <p class="subtitle">Letztes Training: 62,5 kg x 10</p>
+              </div>
+              <span class="tag green" id="setCountB">3 Sätze</span>
+            </div>
+            <table class="set-table" aria-label="Sätze Rudern">
+              <thead>
+                <tr><th>Satz</th><th>Gewicht</th><th>Wdh.</th></tr>
+              </thead>
+              <tbody id="setsB">
+                <tr><td>1</td><td>62,5 kg</td><td>10</td></tr>
+                <tr><td>2</td><td>62,5 kg</td><td>9</td></tr>
+                <tr><td>3</td><td>60 kg</td><td>10</td></tr>
+              </tbody>
+            </table>
+            <div class="set-inputs">
+              <label><span class="sr-only">Gewicht</span><input id="weightB" inputmode="decimal" value="62,5" aria-label="Gewicht in kg"></label>
+              <label><span class="sr-only">Wiederholungen</span><input id="repsB" inputmode="numeric" value="8" aria-label="Wiederholungen"></label>
+              <button class="btn green" type="button" onclick="addSet('B')"><span class="icon">+</span></button>
+            </div>
+            <label class="muted" for="noteB">Notiz</label>
+            <textarea id="noteB">Schulterblätter bewusst nach hinten.</textarea>
+          </div>
+
+          <div class="panel">
+            <div class="section-head">
+              <div>
+                <h2>Bizepscurls</h2>
+                <p class="subtitle">Noch keine Sätze eingetragen</p>
+              </div>
+              <span class="tag" id="setCountC">0 Sätze</span>
+            </div>
+            <table class="set-table" aria-label="Sätze Bizepscurls">
+              <thead>
+                <tr><th>Satz</th><th>Gewicht</th><th>Wdh.</th></tr>
+              </thead>
+              <tbody id="setsC"></tbody>
+            </table>
+            <div class="set-inputs">
+              <label><span class="sr-only">Gewicht</span><input id="weightC" inputmode="decimal" value="12,5" aria-label="Gewicht in kg"></label>
+              <label><span class="sr-only">Wiederholungen</span><input id="repsC" inputmode="numeric" value="10" aria-label="Wiederholungen"></label>
+              <button class="btn green" type="button" onclick="addSet('C')"><span class="icon">+</span></button>
+            </div>
+            <label class="muted" for="noteC">Notiz</label>
+            <textarea id="noteC" placeholder="Kurze Notiz"></textarea>
+          </div>
+
+          <button class="btn coral" type="button" onclick="openModal('finishModal')">Training abschließen</button>
+        </div>
+      </section>
+
+      <section class="view" data-view="library">
+        <div class="stack">
+          <div class="search-wrap">
+            <label class="sr-only" for="exerciseSearch">Übung suchen</label>
+            <input id="exerciseSearch" type="search" placeholder="Übung suchen" oninput="filterExercises(this.value)">
+          </div>
+
+          <div class="panel">
+            <div class="section-head">
+              <div>
+                <h2>Übungsbibliothek</h2>
+                <p class="subtitle">Persönliche Übungen, jederzeit erweiterbar</p>
+              </div>
+              <button class="btn green" type="button" onclick="openModal('exerciseModal')"><span class="icon">+</span>Neu</button>
+            </div>
+            <div class="exercise-list" id="exerciseList">
+              <div class="exercise-item" data-exercise="bankdrücken brust">
+                <div><h3>Bankdrücken</h3><span class="muted">Langhantel, flache Bank</span></div>
+                <span class="tag">Brust</span>
+              </div>
+              <div class="exercise-item" data-exercise="schulterdrücken schulter">
+                <div><h3>Schulterdrücken</h3><span class="muted">Kurzhanteln sitzend</span></div>
+                <span class="tag">Schulter</span>
+              </div>
+              <div class="exercise-item" data-exercise="klimmzüge rücken">
+                <div><h3>Klimmzüge</h3><span class="muted">Körpergewicht</span></div>
+                <span class="tag">Rücken</span>
+              </div>
+              <div class="exercise-item" data-exercise="rudern kabel rücken">
+                <div><h3>Rudern am Kabel</h3><span class="muted">Neutraler Griff</span></div>
+                <span class="tag">Rücken</span>
+              </div>
+              <div class="exercise-item" data-exercise="kniebeugen beine">
+                <div><h3>Kniebeugen</h3><span class="muted">Langhantel</span></div>
+                <span class="tag">Beine</span>
+              </div>
+              <div class="exercise-item" data-exercise="beinpresse beine">
+                <div><h3>Beinpresse</h3><span class="muted">45 Grad Maschine</span></div>
+                <span class="tag">Beine</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" data-view="analysis">
+        <div class="stack">
+          <div class="panel">
+            <div class="section-head">
+              <div>
+                <h2>Analyse</h2>
+                <p class="subtitle">Verlauf pro Übung mit Linien und Punkten</p>
+              </div>
+              <select aria-label="Übung auswählen" onchange="updateAnalysis(this.value)">
+                <option>Bankdrücken</option>
+                <option>Rudern am Kabel</option>
+                <option>Kniebeugen</option>
+              </select>
+            </div>
+            <div class="small-grid">
+              <div class="metric">
+                <strong id="bestWeight">72,5 kg</strong>
+                <span class="muted">Höchstes Gewicht</span>
+              </div>
+              <div class="metric">
+                <strong id="bestTopSet">72,5 kg x 5</strong>
+                <span class="muted">Höchstes Gewicht mit höchster Wiederholung</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="section-head">
+              <h2>Übungsverlauf</h2>
+              <span class="tag green">5 Einheiten</span>
+            </div>
+            <div class="line-chart" aria-label="Linienverlauf Bankdrücken">
+              <svg viewBox="0 0 340 122" role="img" aria-label="Höchstes Gewicht pro Training">
+                <polyline class="chart-line" points="18,92 94,72 170,54 246,46 322,26"></polyline>
+                <circle class="chart-point" cx="18" cy="92" r="7"></circle>
+                <circle class="chart-point" cx="94" cy="72" r="7"></circle>
+                <circle class="chart-point" cx="170" cy="54" r="7"></circle>
+                <circle class="chart-point" cx="246" cy="46" r="7"></circle>
+                <circle class="chart-point" cx="322" cy="26" r="7"></circle>
+              </svg>
+              <div class="chart-labels">
+                <span>65 kg</span>
+                <span>67,5 kg</span>
+                <span>70 kg</span>
+                <span>70 kg</span>
+                <span>72,5 kg</span>
+              </div>
+              <div class="chart-caption">
+                <span>Letzte 5 Einheiten</span>
+                <strong>Top-Set: 72,5 kg x 5 Wdh.</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="section-head">
+              <h2>Top-Set Verlauf</h2>
+              <span class="tag">kg x Wdh.</span>
+            </div>
+            <div class="line-chart" aria-label="Linienverlauf Top-Set">
+              <svg viewBox="0 0 340 122" role="img" aria-label="Höchstes Gewicht mit Wiederholungen">
+                <polyline class="chart-line blue" points="18,84 94,78 170,56 246,62 322,36"></polyline>
+                <circle class="chart-point blue" cx="18" cy="84" r="7"></circle>
+                <circle class="chart-point blue" cx="94" cy="78" r="7"></circle>
+                <circle class="chart-point blue" cx="170" cy="56" r="7"></circle>
+                <circle class="chart-point blue" cx="246" cy="62" r="7"></circle>
+                <circle class="chart-point blue" cx="322" cy="36" r="7"></circle>
+              </svg>
+              <div class="chart-labels">
+                <span>65 x 8</span>
+                <span>67,5 x 7</span>
+                <span>70 x 8</span>
+                <span>70 x 7</span>
+                <span>72,5 x 5</span>
+              </div>
+              <div class="chart-caption">
+                <span>Beste Sätze je Einheit</span>
+                <strong>Höchstes Gewicht + beste Wdh.</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" data-view="settings">
+        <div class="stack">
+          <div class="panel">
+            <h2>Einstellungen</h2>
+            <p class="subtitle">Nur lokale Daten. Kein Konto, keine Cloud, kein Kalorienzähler.</p>
+          </div>
+
+          <div class="panel">
+            <div class="section-head">
+              <div>
+                <h2>Lokale Speicherung</h2>
+                <p class="subtitle">Geplant: IndexedDB, Service Worker und navigator.storage.persist() für möglichst dauerhafte iPhone-Speicherung.</p>
+              </div>
+              <span class="tag green">IndexedDB</span>
+            </div>
+            <div class="small-grid">
+              <div class="metric">
+                <strong>dauerhaft</strong>
+                <span class="muted">Keine automatische Löschung alter Trainings</span>
+              </div>
+              <div class="metric">
+                <strong>01.06.2026</strong>
+                <span class="muted">Letztes Backup</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-list">
+            <button class="settings-item" type="button" onclick="openModal('exportModal')">
+              <span><strong>Export</strong><br><span class="muted">Trainingspläne, Übungen und Logs als JSON sichern</span></span>
+              <span class="tag green">JSON</span>
+            </button>
+            <button class="settings-item" type="button" onclick="openModal('importModal')">
+              <span><strong>Import</strong><br><span class="muted">Backup wiederherstellen und lokale Daten ersetzen</span></span>
+              <span class="tag">Datei</span>
+            </button>
+            <button class="settings-item" type="button" onclick="openModal('resetModal')">
+              <span><strong>Lokale Daten zurücksetzen</strong><br><span class="muted">Nur für den spaeteren echten App-Modus vorgesehen</span></span>
+              <span class="tag coral">Demo</span>
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <nav class="nav" aria-label="Hauptnavigation">
+      <button class="active" type="button" data-target="home" onclick="showView('home')"><b>H</b><span>Start</span></button>
+      <button type="button" data-target="plans" onclick="showView('plans')"><b>P</b><span>Pläne</span></button>
+      <button type="button" data-target="workout" onclick="showView('workout')"><b>T</b><span>Training</span></button>
+      <button type="button" data-target="library" onclick="showView('library')"><b>U</b><span>Übung</span></button>
+      <button type="button" data-target="analysis" onclick="showView('analysis')"><b>A</b><span>Analyse</span></button>
+      <button type="button" data-target="settings" onclick="showView('settings')"><b>E</b><span>Backup</span></button>
+    </nav>
+  </div>
+
+  <div class="modal" id="planModal" role="dialog" aria-modal="true" aria-label="Plan wechseln">
+    <div class="modal-card">
+      <h2>Trainingsplan wechseln</h2>
+      <p class="muted">Im echten App-Modus wird dadurch der aktive Wochenplan gesetzt. Der Clickdummy zeigt nur den Ablauf.</p>
+      <button class="settings-item" type="button"><span>Hypertrophie Sommer<br><span class="muted">Aktuell aktiv</span></span><span class="tag green">aktiv</span></button>
+      <button class="settings-item" type="button"><span>Kraftblock<br><span class="muted">3 schwere Tage</span></span><span class="tag">wählen</span></button>
+      <div class="modal-actions">
+        <button class="btn secondary" type="button" onclick="closeModals()">Schließen</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="newPlanModal" role="dialog" aria-modal="true" aria-label="Neuer Trainingsplan">
+    <div class="modal-card">
+      <h2>Trainingsplan anlegen</h2>
+      <label class="muted" for="planName">Name</label>
+      <input id="planName" value="Neuer Wochenplan">
+      <div class="modal-actions">
+        <button class="btn green" type="button" onclick="closeModals()">Anlegen</button>
+        <button class="btn secondary" type="button" onclick="closeModals()">Abbrechen</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="editDayModal" role="dialog" aria-modal="true" aria-label="Tag bearbeiten">
+    <div class="modal-card">
+      <h2>Montag: Push bearbeiten</h2>
+      <p class="muted">Übungen werden im Plan festgelegt. Sätze und Gewicht kommen erst im Training dazu.</p>
+      <div class="exercise-list">
+        <div class="exercise-item"><span>Bankdrücken</span><span class="tag">Brust</span></div>
+        <div class="exercise-item"><span>Schulterdrücken</span><span class="tag">Schulter</span></div>
+        <div class="exercise-item"><span>Trizepsdrücken</span><span class="tag">Arme</span></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn green" type="button" onclick="closeModals()">Speichern</button>
+        <button class="btn secondary" type="button" onclick="closeModals()">Abbrechen</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="exerciseModal" role="dialog" aria-modal="true" aria-label="Übung anlegen">
+    <div class="modal-card">
+      <h2>Übung anlegen</h2>
+      <label class="muted" for="exerciseName">Name</label>
+      <input id="exerciseName" value="Face Pulls">
+      <label class="muted" for="exerciseCategory">Kategorie</label>
+      <input id="exerciseCategory" value="Schulter">
+      <label class="muted" for="exerciseNotes">Hinweis</label>
+      <textarea id="exerciseNotes">Seil auf Augenhoehe, kontrollierte Bewegung.</textarea>
+      <div class="modal-actions">
+        <button class="btn green" type="button" onclick="closeModals()">Speichern</button>
+        <button class="btn secondary" type="button" onclick="closeModals()">Abbrechen</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="finishModal" role="dialog" aria-modal="true" aria-label="Training abschließen">
+    <div class="modal-card">
+      <h2>Training abschließen?</h2>
+      <p class="muted">Der echte App-Modus wuerde die Einheit lokal speichern und für die Analyse verwenden.</p>
+      <div class="small-grid">
+        <div class="metric"><strong id="modalSets">5</strong><span class="muted">Sätze</span></div>
+        <div class="metric"><strong>3.125 kg</strong><span class="muted">Volumen</span></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn green" type="button" onclick="closeModals(); showView('analysis')">Speichern</button>
+        <button class="btn secondary" type="button" onclick="closeModals()">Weiter trainieren</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="exportModal" role="dialog" aria-modal="true" aria-label="Export">
+    <div class="modal-card">
+      <h2>Export</h2>
+      <p class="muted">Der Export wuerde eine JSON-Datei mit Plänen, Bibliothek, Trainingseinheiten, Sätzen und Notizen erzeugen.</p>
+      <textarea readonly>{
+  "plans": 3,
+  "exercises": 18,
+  "sessions": 42,
+  "format": "fitplan-local-backup"
+}</textarea>
+      <div class="modal-actions">
+        <button class="btn green" type="button" onclick="closeModals()">Export simulieren</button>
+        <button class="btn secondary" type="button" onclick="closeModals()">Schließen</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="importModal" role="dialog" aria-modal="true" aria-label="Import">
+    <div class="modal-card">
+      <h2>Import</h2>
+      <p class="muted">Import ersetzt den lokalen Datenbestand nach Bestätigung. Das ist die sichere Variante für Version 1.</p>
+      <button class="settings-item" type="button"><span>Backup-Datei auswählen<br><span class="muted">fitplan-backup.json</span></span><span class="tag">JSON</span></button>
+      <div class="modal-actions">
+        <button class="btn coral" type="button" onclick="closeModals()">Import simulieren</button>
+        <button class="btn secondary" type="button" onclick="closeModals()">Abbrechen</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="resetModal" role="dialog" aria-modal="true" aria-label="Daten zurücksetzen">
+    <div class="modal-card">
+      <h2>Lokale Daten zurücksetzen</h2>
+      <p class="muted">Im Clickdummy passiert nichts. In der echten App muesste diese Aktion deutlich bestaetigt werden.</p>
+      <div class="modal-actions">
+        <button class="btn coral" type="button" onclick="closeModals()">Verstanden</button>
+        <button class="btn secondary" type="button" onclick="closeModals()">Abbrechen</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const titles = {
+      home: ["FitPlan", "Offline-first Trainingsplan für dein iPhone"],
+      plans: ["Trainingspläne", "Wochenpläne erstellen und wechseln"],
+      workout: ["Training", "Sätze, Gewicht, Wiederholungen und Notizen"],
+      library: ["Übungsbibliothek", "Deine persönlichen Übungen"],
+      analysis: ["Analyse", "Fortschritt pro Übung über Zeit"],
+      settings: ["Backup", "Export, Import und lokale Daten"]
+    };
+
+    function showView(viewName) {
+      document.querySelectorAll(".view").forEach((view) => {
+        view.classList.toggle("active", view.dataset.view === viewName);
+      });
+      document.querySelectorAll(".nav button").forEach((button) => {
+        button.classList.toggle("active", button.dataset.target === viewName);
+      });
+      document.getElementById("screenTitle").textContent = titles[viewName][0];
+      document.getElementById("screenSubtitle").textContent = titles[viewName][1];
+      document.querySelector("main").scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function addSet(group) {
+      const tbody = document.getElementById(`sets${group}`);
+      const weight = document.getElementById(`weight${group}`).value || "0";
+      const reps = document.getElementById(`reps${group}`).value || "0";
+      const row = document.createElement("tr");
+      const next = tbody.children.length + 1;
+
+      row.innerHTML = `<td>${next}</td><td>${weight} kg</td><td>${reps}</td>`;
+      tbody.appendChild(row);
+
+      const label = document.getElementById(`setCount${group}`);
+      label.textContent = `${next} ${next === 1 ? "Satz" : "Sätze"}`;
+      label.classList.add("green");
+
+      const total = document.querySelectorAll("#setsA tr, #setsB tr, #setsC tr").length;
+      document.getElementById("modalSets").textContent = String(total);
+    }
+
+    function openModal(id) {
+      closeModals();
+      document.getElementById(id).classList.add("open");
+    }
+
+    function closeModals() {
+      document.querySelectorAll(".modal").forEach((modal) => modal.classList.remove("open"));
+    }
+
+    function filterExercises(query) {
+      const needle = query.trim().toLowerCase();
+      document.querySelectorAll("#exerciseList .exercise-item").forEach((item) => {
+        item.style.display = item.dataset.exercise.includes(needle) ? "grid" : "none";
+      });
+    }
+
+    function showWorkoutPreview(day, title) {
+      const preview = document.getElementById("todayPreview");
+      const empty = title === "Pause";
+      preview.querySelector("h2").textContent = `${day}: ${title}`;
+      preview.querySelector("p").textContent = empty
+        ? "Kein Workout geplant. Du kannst den Wochentag im Plan bearbeiten."
+        : "Geplante Übungen stehen fest. Sätze und Gewicht werden erst im Training eingetragen.";
+    }
+
+    function updateAnalysis(exerciseName) {
+      const data = {
+        "Bankdrücken": ["72,5 kg", "72,5 kg x 5"],
+        "Rudern am Kabel": ["65 kg", "65 kg x 8"],
+        "Kniebeugen": ["105 kg", "105 kg x 6"]
+      };
+      const values = data[exerciseName] || data.Bankdrücken;
+      document.getElementById("bestWeight").textContent = values[0];
+      document.getElementById("bestTopSet").textContent = values[1];
+    }
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        closeModals();
+      }
+    });
+
+    const initialView = window.location.hash.replace("#", "");
+    if (titles[initialView]) {
+      showView(initialView);
+    }
+  </script>
+</body>
+</html>
