@@ -1,0 +1,19 @@
+{
+  "name": "FitPlan",
+  "short_name": "FitPlan",
+  "description": "Private offline-first Fitness-PWA für Trainingspläne, Logs und Analyse.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f6f1",
+  "theme_color": "#16201b",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

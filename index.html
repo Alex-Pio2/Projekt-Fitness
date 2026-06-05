@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#16201b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="FitPlan">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon.svg">
+  <link rel="stylesheet" href="src/styles.css">
+  <title>FitPlan</title>
+</head>
+<body>
+  <div class="app-shell" role="application" aria-label="FitPlan">
+    <div class="status-row">
+      <span id="clock">--:--</span>
+      <span class="signal" aria-label="Offline nutzbar"><span></span><span></span><span></span></span>
+    </div>
+
+    <header class="app-header">
+      <div>
+        <h1 id="screenTitle">FitPlan</h1>
+        <p id="screenSubtitle">Offline-first Trainingsplan für dein iPhone</p>
+      </div>
+      <span class="status-pill" id="offlineStatus">Offline bereit</span>
+    </header>
+
+    <main id="mainContent">
+      <section class="view active" data-view="home" aria-label="Start">
+        <div class="stack">
+          <section class="panel">
+            <div class="section-head">
+              <div>
+                <h2>Aktiver Trainingsplan</h2>
+                <p class="muted" id="activePlanName">Wird geladen</p>
+              </div>
+              <span class="tag green" id="weekLabel">Diese Woche</span>
+            </div>
+            <div class="week-grid" id="weekGrid" aria-label="Wochenplan"></div>
+          </section>
+
+          <section class="hero-panel" id="todayPanel">
+            <span class="tag">Heute</span>
+            <h2 id="todayTitle">Training</h2>
+            <p id="todayDescription">Wird geladen</p>
+            <button class="btn green" type="button" id="startTodayButton">Training starten</button>
+          </section>
+
+          <section class="metric-grid">
+            <div class="metric">
+              <strong id="sessionCount">0</strong>
+              <span>Trainings gespeichert</span>
+            </div>
+            <div class="metric">
+              <strong id="lastBackupMetric">Nie</strong>
+              <span>Letztes Backup</span>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="section-head">
+              <h2>Zuletzt trainiert</h2>
+              <button class="btn secondary" type="button" data-go="analysis">Analyse</button>
+            </div>
+            <div id="recentList" class="list"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" data-view="plans" aria-label="Trainingspläne">
+        <div class="stack">
+          <section class="panel">
+            <div class="section-head">
+              <div>
+                <h2>Trainingspläne</h2>
+                <p class="muted">Wochenpläne erstellen und aktiv setzen</p>
+              </div>
+              <button class="btn green" type="button" id="addPlanButton">Neu</button>
+            </div>
+          </section>
+          <div id="plansList" class="stack"></div>
+        </div>
+      </section>
+
+      <section class="view" data-view="workout" aria-label="Training">
+        <div class="stack">
+          <section class="hero-panel">
+            <span class="tag">Live-Training</span>
+            <h2 id="workoutTitle">Kein Training aktiv</h2>
+            <p id="workoutSubtitle">Starte ein Training aus deinem Wochenplan.</p>
+          </section>
+          <div id="workoutExercises" class="stack"></div>
+          <button class="btn coral" type="button" id="completeWorkoutButton">Training abschließen</button>
+        </div>
+      </section>
+
+      <section class="view" data-view="library" aria-label="Übungsbibliothek">
+        <div class="stack">
+          <section class="panel">
+            <div class="section-head">
+              <div>
+                <h2>Übungsbibliothek</h2>
+                <p class="muted">Persönliche Übungen, jederzeit erweiterbar</p>
+              </div>
+              <button class="btn green" type="button" id="saveExerciseButton">Speichern</button>
+            </div>
+            <div class="form-grid">
+              <label>Name<input id="exerciseName" autocomplete="off" placeholder="Face Pulls"></label>
+              <label>Kategorie<input id="exerciseCategory" autocomplete="off" placeholder="Schulter"></label>
+              <label class="full">Hinweis<textarea id="exerciseNote" placeholder="Kurze Techniknotiz"></textarea></label>
+            </div>
+          </section>
+          <section class="panel">
+            <label class="search-label">Übung suchen<input id="exerciseSearch" type="search" placeholder="Übung suchen"></label>
+            <div id="exerciseList" class="list"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" data-view="analysis" aria-label="Analyse">
+        <div class="stack">
+          <section class="panel">
+            <div class="section-head">
+              <div>
+                <h2>Analyse</h2>
+                <p class="muted">Verlauf pro Übung mit Linien und Punkten</p>
+              </div>
+              <select id="analysisExercise" aria-label="Übung auswählen"></select>
+            </div>
+            <div class="metric-grid">
+              <div class="metric">
+                <strong id="bestWeight">0 kg</strong>
+                <span>Höchstes Gewicht</span>
+              </div>
+              <div class="metric">
+                <strong id="bestTopSet">0 kg x 0</strong>
+                <span>Höchstes Gewicht mit höchster Wiederholung</span>
+              </div>
+            </div>
+          </section>
+          <section class="panel">
+            <div class="section-head">
+              <h2>Übungsverlauf</h2>
+              <span class="tag green" id="analysisCount">0 Einheiten</span>
+            </div>
+            <div id="weightChart" class="line-chart"></div>
+          </section>
+          <section class="panel">
+            <div class="section-head">
+              <h2>Top-Set Verlauf</h2>
+              <span class="tag">kg x Wdh.</span>
+            </div>
+            <div id="topSetChart" class="line-chart"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" data-view="settings" aria-label="Einstellungen">
+        <div class="stack">
+          <section class="panel">
+            <h2>Einstellungen</h2>
+            <p class="muted">Nur lokale Daten. Kein Konto, keine Cloud, kein Kalorienzähler.</p>
+          </section>
+          <section class="panel">
+            <div class="section-head">
+              <div>
+                <h2>Lokale Speicherung</h2>
+                <p class="muted">IndexedDB, Service Worker und navigator.storage.persist() für möglichst dauerhafte iPhone-Speicherung.</p>
+              </div>
+              <span class="tag green">IndexedDB</span>
+            </div>
+            <div class="metric-grid">
+              <div class="metric">
+                <strong id="storagePersisted">Prüfe</strong>
+                <span>Persistente Speicherung</span>
+              </div>
+              <div class="metric">
+                <strong id="storageUsage">--</strong>
+                <span>Lokaler Speicher</span>
+              </div>
+            </div>
+          </section>
+          <section class="settings-list">
+            <button class="settings-item" type="button" id="exportButton">
+              <span><strong>Export</strong><br><span>Trainingspläne, Übungen und Logs als JSON sichern</span></span>
+              <span class="tag green">JSON</span>
+            </button>
+            <label class="settings-item file-picker">
+              <span><strong>Import</strong><br><span>Backup wiederherstellen und lokale Daten ersetzen</span></span>
+              <span class="tag">Datei</span>
+              <input id="importFile" type="file" accept="application/json">
+            </label>
+            <button class="settings-item" type="button" id="resetButton">
+              <span><strong>Demo-Daten zurücksetzen</strong><br><span>Setzt die lokale PWA auf den Startzustand zurück</span></span>
+              <span class="tag coral">Reset</span>
+            </button>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="Hauptnavigation">
+      <button class="active" type="button" data-go="home"><b>H</b><span>Start</span></button>
+      <button type="button" data-go="plans"><b>P</b><span>Pläne</span></button>
+      <button type="button" data-go="workout"><b>T</b><span>Training</span></button>
+      <button type="button" data-go="library"><b>Ü</b><span>Übung</span></button>
+      <button type="button" data-go="analysis"><b>A</b><span>Analyse</span></button>
+      <button type="button" data-go="settings"><b>B</b><span>Backup</span></button>
+    </nav>
+  </div>
+
+  <div class="modal" id="modal" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <h2 id="modalTitle">Hinweis</h2>
+      <p id="modalText">Text</p>
+      <button class="btn green" type="button" id="modalClose">Schließen</button>
+    </div>
+  </div>
+
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>

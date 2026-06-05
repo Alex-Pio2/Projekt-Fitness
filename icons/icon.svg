@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="FitPlan Icon">
+  <rect width="512" height="512" rx="96" fill="#16201b"/>
+  <circle cx="256" cy="256" r="172" fill="#1f7a55"/>
+  <path d="M150 280h212v48H150zM176 184h48v144h-48zM288 184h48v144h-48zM116 224h52v64h-52zM344 224h52v64h-52z" fill="#f4f6f1"/>
+  <path d="M164 374h184" stroke="#f1c64e" stroke-width="28" stroke-linecap="round"/>
+</svg>
