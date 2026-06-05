@@ -221,12 +221,26 @@ function exerciseById(id) {
   return state.exercises.find((exercise) => exercise.id === id);
 }
 
+function ensurePlanDay(plan, weekday) {
+  if (!plan.days[weekday]) {
+    plan.days[weekday] = { title: "frei", exerciseIds: [] };
+  }
+
+  if (!Array.isArray(plan.days[weekday].exerciseIds)) {
+    plan.days[weekday].exerciseIds = [];
+  }
+
+  return plan.days[weekday];
+}
+
 function initElements() {
   [
     "clock", "screenTitle", "screenSubtitle", "offlineStatus", "activePlanName", "weekLabel",
     "weekGrid", "todayPanel", "todayTitle", "todayDescription", "startTodayButton",
     "sessionCount", "lastBackupMetric", "recentList", "plansList", "workoutTitle",
-    "workoutSubtitle", "workoutExercises", "completeWorkoutButton", "exerciseName",
+    "planEditorSelect", "planNameInput", "planDaySelect", "planDayTitleInput",
+    "savePlanNameButton", "savePlanDayButton", "planExerciseSelect", "addPlanExerciseButton",
+    "planDayExerciseList", "workoutSubtitle", "workoutExercises", "completeWorkoutButton", "exerciseName",
     "exerciseCategory", "exerciseNote", "saveExerciseButton", "exerciseSearch", "exerciseList",
     "analysisExercise", "bestWeight", "bestTopSet", "analysisCount", "weightChart",
     "topSetChart", "storagePersisted", "storageUsage", "exportButton", "importFile",
@@ -243,6 +257,11 @@ function wireEvents() {
 
   elements.startTodayButton.addEventListener("click", () => startWorkout(todayKey()));
   elements.completeWorkoutButton.addEventListener("click", completeWorkout);
+  elements.planEditorSelect.addEventListener("change", renderPlanEditor);
+  elements.planDaySelect.addEventListener("change", renderPlanEditor);
+  elements.savePlanNameButton.addEventListener("click", savePlanName);
+  elements.savePlanDayButton.addEventListener("click", savePlanDayTitle);
+  elements.addPlanExerciseButton.addEventListener("click", addExerciseToPlanDay);
   elements.saveExerciseButton.addEventListener("click", addExercise);
   elements.exerciseSearch.addEventListener("input", renderLibrary);
   elements.analysisExercise.addEventListener("change", renderAnalysis);
@@ -337,8 +356,10 @@ function renderHome() {
 function renderPlans() {
   elements.plansList.innerHTML = state.plans.map((plan) => {
     const days = WEEKDAYS
-      .filter(([key]) => plan.days[key])
-      .map(([key]) => `<div class="list-item"><span>${weekdayLabel(key)}: ${plan.days[key].title}</span><span class="tag">${plan.days[key].exerciseIds.length} Übungen</span></div>`)
+      .map(([key]) => {
+        const day = ensurePlanDay(plan, key);
+        return `<div class="list-item"><span>${weekdayLabel(key)}: ${day.title || "frei"}</span><span class="tag">${day.exerciseIds.length} Übungen</span></div>`;
+      })
       .join("");
 
     return `
@@ -374,12 +395,135 @@ function renderPlans() {
       id,
       name: `Neuer Plan ${state.plans.length + 1}`,
       active: false,
-      days: {}
+      days: Object.fromEntries(WEEKDAYS.map(([key]) => [key, { title: "frei", exerciseIds: [] }]))
     });
     await saveState();
-    renderPlans();
+    render();
     openModal("Plan angelegt", "Der neue Wochenplan wurde lokal gespeichert.");
   };
+
+  renderPlanEditor();
+}
+
+function selectedPlanForEditing() {
+  const selectedPlanId = elements.planEditorSelect.value || state.settings.activePlanId;
+  return state.plans.find((plan) => plan.id === selectedPlanId) || activePlan();
+}
+
+function renderPlanEditor() {
+  const previousPlanId = elements.planEditorSelect.value || state.settings.activePlanId;
+  const previousDay = elements.planDaySelect.value || todayKey();
+  const plan = state.plans.find((item) => item.id === previousPlanId) || activePlan();
+
+  elements.planEditorSelect.innerHTML = state.plans.map((item) =>
+    `<option value="${item.id}">${item.name}</option>`
+  ).join("");
+  elements.planEditorSelect.value = plan.id;
+
+  elements.planNameInput.value = plan.name;
+  elements.planDaySelect.innerHTML = WEEKDAYS.map(([key, shortLabel, longLabel]) =>
+    `<option value="${key}">${shortLabel} - ${longLabel}</option>`
+  ).join("");
+  elements.planDaySelect.value = WEEKDAYS.some(([key]) => key === previousDay) ? previousDay : todayKey();
+
+  const day = ensurePlanDay(plan, elements.planDaySelect.value);
+  elements.planDayTitleInput.value = day.title || "frei";
+
+  const usedExerciseIds = new Set(day.exerciseIds);
+  const availableExercises = state.exercises.filter((exercise) => !usedExerciseIds.has(exercise.id));
+  elements.planExerciseSelect.innerHTML = availableExercises.length
+    ? availableExercises.map((exercise) => `<option value="${exercise.id}">${exercise.name}</option>`).join("")
+    : `<option value="">Keine weitere Übung verfügbar</option>`;
+  elements.planExerciseSelect.disabled = !availableExercises.length;
+  elements.addPlanExerciseButton.disabled = !availableExercises.length;
+
+  elements.planDayExerciseList.innerHTML = day.exerciseIds.length ? day.exerciseIds.map((exerciseId) => {
+    const exercise = exerciseById(exerciseId);
+    return `
+      <div class="list-item">
+        <div>
+          <h3>${exercise?.name || "Gelöschte Übung"}</h3>
+          <span class="muted">${exercise?.note || exercise?.category || "Keine Notiz"}</span>
+        </div>
+        <button class="btn coral small-action" type="button" data-remove-plan-exercise="${exerciseId}">
+          Übung entfernen
+        </button>
+      </div>
+    `;
+  }).join("") : `<div class="empty-state">Dieser Trainingstag hat noch keine Übungen.</div>`;
+
+  elements.planDayExerciseList.querySelectorAll("[data-remove-plan-exercise]").forEach((button) => {
+    button.addEventListener("click", () => removeExerciseFromPlanDay(plan.id, elements.planDaySelect.value, button.dataset.removePlanExercise));
+  });
+}
+
+async function savePlanName() {
+  const plan = selectedPlanForEditing();
+  const name = elements.planNameInput.value.trim();
+
+  if (!name) {
+    openModal("Planname fehlt", "Bitte gib einen Namen für den Trainingsplan ein.");
+    return;
+  }
+
+  plan.name = name;
+  await saveState();
+  render();
+  elements.planEditorSelect.value = plan.id;
+  openModal("Plan gespeichert", "Der Planname wurde lokal gespeichert.");
+}
+
+async function savePlanDayTitle() {
+  const plan = selectedPlanForEditing();
+  const weekday = elements.planDaySelect.value;
+  const day = ensurePlanDay(plan, weekday);
+  day.title = elements.planDayTitleInput.value.trim() || "frei";
+
+  await saveState();
+  render();
+  elements.planEditorSelect.value = plan.id;
+  elements.planDaySelect.value = weekday;
+  renderPlanEditor();
+  openModal("Trainingstag gespeichert", "Der Trainingstag wurde lokal im Plan aktualisiert.");
+}
+
+async function addExerciseToPlanDay() {
+  const plan = selectedPlanForEditing();
+  const weekday = elements.planDaySelect.value;
+  const day = ensurePlanDay(plan, weekday);
+  const exerciseId = elements.planExerciseSelect.value;
+
+  if (!exerciseId) {
+    return;
+  }
+
+  if (!day.exerciseIds.includes(exerciseId)) {
+    day.exerciseIds.push(exerciseId);
+  }
+
+  await saveState();
+  render();
+  elements.planEditorSelect.value = plan.id;
+  elements.planDaySelect.value = weekday;
+  renderPlanEditor();
+  openModal("Übung hinzugefügt", "Die Übung wurde dem Trainingstag hinzugefügt.");
+}
+
+async function removeExerciseFromPlanDay(planId, weekday, exerciseId) {
+  const plan = state.plans.find((item) => item.id === planId);
+  if (!plan) {
+    return;
+  }
+
+  const day = ensurePlanDay(plan, weekday);
+  day.exerciseIds = day.exerciseIds.filter((id) => id !== exerciseId);
+
+  await saveState();
+  render();
+  elements.planEditorSelect.value = plan.id;
+  elements.planDaySelect.value = weekday;
+  renderPlanEditor();
+  openModal("Übung entfernt", "Die Übung wurde aus diesem Trainingstag entfernt.");
 }
 
 function startWorkout(weekday) {
@@ -425,8 +569,8 @@ function renderWorkout() {
       <section class="panel" data-workout-exercise="${log.exerciseId}">
         <div class="section-head">
           <div>
-            <h2>${exercise.name}</h2>
-            <p class="muted">${exercise.note || exercise.category}</p>
+            <h2>${exercise?.name || "Gelöschte Übung"}</h2>
+            <p class="muted">${exercise?.note || exercise?.category || "Nicht mehr in der Bibliothek"}</p>
           </div>
           <span class="tag green">${log.sets.length} ${log.sets.length === 1 ? "Satz" : "Sätze"}</span>
         </div>
@@ -505,15 +649,22 @@ function renderLibrary() {
     return haystack.includes(query);
   });
 
-  elements.exerciseList.innerHTML = exercises.map((exercise) => `
+  elements.exerciseList.innerHTML = exercises.length ? exercises.map((exercise) => `
     <div class="list-item">
       <div>
         <h3>${exercise.name}</h3>
         <span class="muted">${exercise.note || "Keine Notiz"}</span>
       </div>
-      <span class="tag">${exercise.category || "Allgemein"}</span>
+      <div class="list-actions">
+        <span class="tag">${exercise.category || "Allgemein"}</span>
+        <button class="btn coral small-action" type="button" data-remove-exercise="${exercise.id}">Übung entfernen</button>
+      </div>
     </div>
-  `).join("");
+  `).join("") : `<div class="empty-state">Keine Übung gefunden.</div>`;
+
+  elements.exerciseList.querySelectorAll("[data-remove-exercise]").forEach((button) => {
+    button.addEventListener("click", () => removeExercise(button.dataset.removeExercise));
+  });
 }
 
 async function addExercise() {
@@ -535,8 +686,31 @@ async function addExercise() {
   elements.exerciseNote.value = "";
   await saveState();
   renderLibrary();
+  renderPlans();
   renderAnalysisOptions();
   openModal("Übung gespeichert", "Die Übung wurde lokal in deiner Bibliothek gespeichert.");
+}
+
+async function removeExercise(exerciseId) {
+  const exercise = exerciseById(exerciseId);
+  if (!exercise) {
+    return;
+  }
+
+  state.exercises = state.exercises.filter((item) => item.id !== exerciseId);
+  state.plans.forEach((plan) => {
+    Object.keys(plan.days).forEach((weekday) => {
+      plan.days[weekday].exerciseIds = plan.days[weekday].exerciseIds.filter((id) => id !== exerciseId);
+    });
+  });
+
+  if (currentWorkout) {
+    currentWorkout.exerciseLogs = currentWorkout.exerciseLogs.filter((log) => log.exerciseId !== exerciseId);
+  }
+
+  await saveState();
+  render();
+  openModal("Übung entfernt", `${exercise.name} wurde aus der Bibliothek und aus deinen Plänen entfernt. Alte Trainingslogs bleiben gespeichert.`);
 }
 
 function renderAnalysisOptions() {
@@ -548,7 +722,7 @@ function renderAnalysisOptions() {
   if (current && state.exercises.some((exercise) => exercise.id === current)) {
     elements.analysisExercise.value = current;
   } else {
-    elements.analysisExercise.value = "bench";
+    elements.analysisExercise.value = state.exercises[0]?.id || "";
   }
 }
 
@@ -587,6 +761,15 @@ function calculateExerciseStats(exerciseId) {
 
 function renderAnalysis() {
   const exerciseId = elements.analysisExercise.value || state.exercises[0]?.id;
+  if (!exerciseId) {
+    elements.bestWeight.textContent = "0 kg";
+    elements.bestTopSet.textContent = "0 kg x 0";
+    elements.analysisCount.textContent = "0 Einheiten";
+    elements.weightChart.innerHTML = `<div class="empty-state">Noch keine Übung für die Analyse vorhanden.</div>`;
+    elements.topSetChart.innerHTML = `<div class="empty-state">Noch keine Übung für die Analyse vorhanden.</div>`;
+    return;
+  }
+
   const stats = calculateExerciseStats(exerciseId);
 
   elements.bestWeight.textContent = formatWeight(stats.highestWeight || 0);

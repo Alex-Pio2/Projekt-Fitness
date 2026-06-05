@@ -36,6 +36,10 @@ read(".nojekyll");
   'data-view="analysis"',
   'data-view="settings"',
   "Übungsbibliothek",
+  "Plan bearbeiten",
+  "Planname",
+  "Trainingstag",
+  "Zum Tag hinzufügen",
   "Höchstes Gewicht",
   "Höchstes Gewicht mit höchster Wiederholung",
   "Letztes Backup"
@@ -68,6 +72,13 @@ assert(Array.isArray(manifest.icons) && manifest.icons.length >= 1, "manifest mu
   "exportBackup",
   "importBackup",
   "completeWorkout",
+  "renderPlanEditor",
+  "savePlanName",
+  "savePlanDayTitle",
+  "addExerciseToPlanDay",
+  "removeExerciseFromPlanDay",
+  "removeExercise",
+  "Übung entfernen",
   "calculateExerciseStats",
   "renderAnalysis",
   "FitPlan"
@@ -99,5 +110,6 @@ assert(Array.isArray(manifest.icons) && manifest.icons.length >= 1, "manifest mu
 });
 
 assert(icon.includes("<svg"), "icon must be SVG");
+assert(!fs.existsSync(path.join(root, "server.mjs")), "server.mjs must not exist");
 
 console.log("pwa contract ok");

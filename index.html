@@ -81,6 +81,25 @@
               <button class="btn green" type="button" id="addPlanButton">Neu</button>
             </div>
           </section>
+          <section class="panel" aria-label="Plan bearbeiten">
+            <div class="section-head">
+              <div>
+                <h2>Plan bearbeiten</h2>
+                <p class="muted">Tage benennen und Übungen hinzufügen oder entfernen</p>
+              </div>
+            </div>
+            <div class="form-grid">
+              <label>Plan auswählen<select id="planEditorSelect"></select></label>
+              <label>Planname<input id="planNameInput" autocomplete="off" placeholder="Mein Plan"></label>
+              <label>Trainingstag<select id="planDaySelect"></select></label>
+              <label>Tagesname<input id="planDayTitleInput" autocomplete="off" placeholder="Push"></label>
+              <button class="btn green" type="button" id="savePlanNameButton">Plan speichern</button>
+              <button class="btn secondary" type="button" id="savePlanDayButton">Tag speichern</button>
+              <label class="full">Übung auswählen<select id="planExerciseSelect"></select></label>
+              <button class="btn green full-button" type="button" id="addPlanExerciseButton">Zum Tag hinzufügen</button>
+            </div>
+            <div id="planDayExerciseList" class="list plan-edit-list"></div>
+          </section>
           <div id="plansList" class="stack"></div>
         </div>
       </section>
