@@ -82,6 +82,9 @@ assert(Array.isArray(manifest.icons) && manifest.icons.length >= 1, "manifest mu
   "removeExerciseFromPlanDay",
   "removeExercise",
   "Übung entfernen",
+  "lastExercisePerformance",
+  "Zuletzt",
+  "Keine Daten",
   "calculateExerciseStats",
   "renderAnalysis",
   "FitPlan"

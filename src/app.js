@@ -573,6 +573,26 @@ function startWorkout(weekday) {
   showView("workout");
 }
 
+function lastExercisePerformance(exerciseId) {
+  const lastSession = [...state.sessions]
+    .filter((item) => item.exerciseLogs.some((log) => log.exerciseId === exerciseId && log.sets.length))
+    .sort((a, b) => new Date(b.completedAt || b.date) - new Date(a.completedAt || a.date))[0];
+
+  if (!lastSession) {
+    return null;
+  }
+
+  const log = lastSession.exerciseLogs.find((entry) => entry.exerciseId === exerciseId);
+  const bestSet = [...log.sets].sort((a, b) => b.weight - a.weight || b.reps - a.reps)[0];
+
+  return {
+    date: lastSession.completedAt || lastSession.date,
+    weight: bestSet.weight,
+    reps: bestSet.reps,
+    label: `${formatWeight(bestSet.weight)} x ${bestSet.reps} - ${formatDate(lastSession.completedAt || lastSession.date)}`
+  };
+}
+
 function renderWorkout() {
   if (!currentWorkout) {
     elements.workoutTitle.textContent = "Kein Training aktiv";
@@ -588,6 +608,7 @@ function renderWorkout() {
 
   elements.workoutExercises.innerHTML = currentWorkout.exerciseLogs.map((log) => {
     const exercise = exerciseById(log.exerciseId);
+    const lastPerformance = lastExercisePerformance(log.exerciseId);
     const rows = log.sets.map((set, index) => `<tr><td>${index + 1}</td><td>${set.weight} kg</td><td>${set.reps}</td></tr>`).join("");
 
     return `
@@ -596,6 +617,7 @@ function renderWorkout() {
           <div>
             <h2>${exercise?.name || "Gelöschte Übung"}</h2>
             <p class="muted">${exercise?.note || exercise?.category || "Nicht mehr in der Bibliothek"}</p>
+            <p class="last-performance">Zuletzt: ${lastPerformance?.label || "Keine Daten"}</p>
           </div>
           <span class="tag green">${log.sets.length} ${log.sets.length === 1 ? "Satz" : "Sätze"}</span>
         </div>
